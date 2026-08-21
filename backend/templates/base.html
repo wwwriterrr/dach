@@ -1,0 +1,23 @@
+{% load django_vite i18n %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'ru' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Dachpedigrees{% endblock %}</title>
+  {% vite_hmr_client %}
+  {% vite_asset 'src/main.tsx' %}
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {# Оформление намеренно отсутствует: макет и стили придут из дизайна. #}
+  <header>
+    <a href="{% url 'core:home' %}">Dachpedigrees</a>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer></footer>
+</body>
+</html>

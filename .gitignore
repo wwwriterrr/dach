@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Django
+/var/
+backend/frontend_dist/
+*.log
+
+# Node
+node_modules/
+frontend/dist/
+
+# Секреты и локальные настройки
+.env
+*.local
+
+# Дампы легаси-базы (могут содержать персональные данные пользователей)
+*.sql
+*.sql.gz
+*.dump
+/legacy/
+# ...но init-скрипты Postgres нужны в репозитории:
+!docker/initdb/*.sql
+
+# ОС и редакторы
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

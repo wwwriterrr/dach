@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load islands %}
+
+{% block content %}
+  <h1>Каркас работает</h1>
+  <p>
+    Django отрендерил эту страницу. Блок ниже — React-остров: он смонтирован
+    в серверный HTML и получил параметры из шаблона.
+  </p>
+
+  {% island "demo-search" placeholder="Кличка или номер регистрации" limit=20 %}
+{% endblock %}
