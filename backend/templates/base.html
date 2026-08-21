@@ -9,15 +9,51 @@
   {% block head %}{% endblock %}
 </head>
 <body>
-  {# Оформление намеренно отсутствует: макет и стили придут из дизайна. #}
-  <header>
-    <a href="{% url 'core:home' %}">Dachpedigrees</a>
-  </header>
+  <div class="page">
+    <header class="masthead">
+      <div>
+        {# Логотип временно набран текстом — ждём файл от дизайнера. #}
+        <a class="masthead__logo" href="{% url 'core:home' %}">
+          Dachshunds<em>Worldwide</em>
+        </a>
+        {# Счётчик приходит из контекст-процессора: зашивать число нельзя,
+           оно устареет в тот же день, когда база вырастет. #}
+        <div class="masthead__count">
+          {% if dogs_total %}{{ dogs_total }} собак в базе{% endif %}
+        </div>
+      </div>
 
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+      {# Место под круглую эмблему из макета. #}
+      <div class="masthead__emblem"></div>
 
-  <footer></footer>
+      <div class="masthead__side">
+        <div class="masthead__tagline">
+          База родословных такс<br>с 2009 года
+        </div>
+        <div class="masthead__auth">
+          <a href="#">Вход</a> / <a href="#">Регистрация</a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="nav">
+      {# «AI designer» из макета сюда не вынесен: функционально это пробная
+         вязка, она живёт в карточке собаки. Отдельный пункт меню только
+         раздвоил бы один и тот же инструмент. #}
+      <ul class="nav__list">
+        <li class="nav__item"><a class="nav__link" href="#">База родословных</a></li>
+        <li class="nav__item"><a class="nav__link" href="#">Щенки</a></li>
+        <li class="nav__item"><a class="nav__link" href="#">Кобели для вязки</a></li>
+        <li class="nav__item"><a class="nav__link" href="#">Питомники</a></li>
+        <li class="nav__item"><a class="nav__link" href="#">Объявления</a></li>
+      </ul>
+    </nav>
+
+    {% block layout %}
+      <main class="layout">
+        {% block content %}{% endblock %}
+      </main>
+    {% endblock %}
+  </div>
 </body>
 </html>

@@ -2,6 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { islands } from "./registry";
 
+// Токены и базовые стили: нужны на каждой странице, поэтому висят на входе,
+// а не на конкретном острове. Vite вынесет их в отдельный CSS-файл манифеста.
+import "./styles/tokens.css";
+import "./styles/base.css";
+import "./styles/dog-card.css";
+
 /**
  * Точка входа островного режима.
  *

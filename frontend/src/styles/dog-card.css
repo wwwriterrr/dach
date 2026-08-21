@@ -1,0 +1,288 @@
+/**
+ * Карточка собаки.
+ *
+ * Порядок блоков взят из макета: титулы -> разновидность -> кличка ->
+ * фото -> родители -> паспортные данные -> разделы. Отличия от макета
+ * два, оба намеренные:
+ *   1) метка происхождения записи рядом с кличкой — после слияния баз
+ *      выверенные и импортированные записи должны различаться на глаз;
+ *   2) здоровье вынесено из ряда одинаковых иконок в отдельный блок —
+ *      это то, за чем на сайт приходит заводчик.
+ */
+
+/* --- Идентификация ---------------------------------------------------- */
+
+.dog__titles {
+  text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+
+.dog__variety {
+  margin-top: 0.9rem;
+  text-align: center;
+  font-size: 0.85rem;
+  letter-spacing: 0.03em;
+  color: var(--color-text-muted);
+}
+
+.dog__headline {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.dog__name {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--color-text-strong);
+}
+
+.dog__sex {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+/* --- Метка происхождения записи --------------------------------------- */
+
+.provenance {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.85rem auto 0;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.provenance--verified {
+  color: var(--color-status-clear);
+}
+
+.provenance--imported {
+  color: var(--color-text-muted);
+}
+
+/* --- Фото ------------------------------------------------------------- */
+
+.dog__photo {
+  margin: 1.5rem auto 0;
+  width: fit-content;
+}
+
+/* Стопка кадров из макета: два смещённых листа под основным снимком. */
+.photo-stack {
+  position: relative;
+  padding: 6px;
+  background: #fff;
+  box-shadow:
+    8px 8px 0 -1px var(--color-border),
+    16px 16px 0 -2px var(--color-surface-panel);
+}
+
+.dog__photo-caption {
+  margin-top: 1rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Родители --------------------------------------------------------- */
+
+.parents {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+.parents__label {
+  color: var(--color-text-muted);
+}
+
+.parents__row--dam .parents__label {
+  color: var(--color-accent);
+}
+
+.parents__link {
+  font-weight: 500;
+}
+
+.parents__unknown {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* --- Паспортные данные ------------------------------------------------ */
+
+.passport {
+  max-width: 460px;
+  margin: 1.75rem auto 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--color-surface-panel);
+  font-size: 0.85rem;
+}
+
+.passport__grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 1rem;
+  margin: 0;
+}
+
+.passport__grid dt {
+  color: var(--color-text-muted);
+}
+
+.passport__grid dd {
+  margin: 0;
+}
+
+.passport__grid dd:empty::after {
+  content: "—";
+  color: var(--color-text-muted);
+}
+
+.passport__section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.passport__section-title {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 0.4rem;
+}
+
+/* --- Здоровье --------------------------------------------------------- */
+
+.health {
+  margin-top: 2.5rem;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-text-strong);
+  margin-bottom: 1rem;
+}
+
+.health__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.health__row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  background: var(--color-surface-sunken);
+  border-left: 3px solid var(--status-color, var(--color-status-unknown));
+}
+
+.health__row--clear {
+  --status-color: var(--color-status-clear);
+}
+
+.health__row--carrier {
+  --status-color: var(--color-status-carrier);
+}
+
+.health__row--affected {
+  --status-color: var(--color-status-affected);
+}
+
+.health__name {
+  font-weight: 500;
+}
+
+.health__meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+/* Статус читается словом, не только цветом — так его видят и дальтоники. */
+.health__status {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--status-color, var(--color-status-unknown));
+  white-space: nowrap;
+}
+
+.health__genotype {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.health__empty {
+  padding: 1rem;
+  background: var(--color-surface-sunken);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Разделы с иконками ----------------------------------------------- */
+
+.facets {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2.5rem;
+  text-align: center;
+}
+
+.facet__icon {
+  height: 64px;
+  margin: 0 auto 0.75rem;
+  color: var(--palette-brown-700);
+}
+
+.facet__name {
+  font-size: 1.1rem;
+  color: var(--color-text-strong);
+}
+
+.facet__meta {
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Правый рельс: COI ------------------------------------------------ */
+
+.coi__value {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--color-text-strong);
+}
+
+.coi__meta {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}

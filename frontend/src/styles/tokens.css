@@ -1,0 +1,98 @@
+/**
+ * Дизайн-токены проекта.
+ *
+ * Палитра снята с макета главной страницы («современная классика»):
+ * оливковые поля, кремовое полотно, тёплый коричневый навбар, беж для
+ * служебных блоков. Родословная кодируется отдельной шкалой — см. ниже.
+ *
+ * Правило: компоненты используют только семантические переменные
+ * (--color-surface, --color-text-muted), а не сырые (--palette-olive-600).
+ * Сырые меняются при подгонке под фирменный стиль, семантические — нет.
+ */
+
+:root {
+  /* --- Сырая палитра ------------------------------------------------ */
+
+  /* Оливковый — поля вокруг полотна страницы */
+  --palette-olive-600: #6b7052;
+  --palette-olive-700: #5a5f45;
+
+  /* Кремовый — полотно и основной фон контента */
+  --palette-cream-50: #f4f3ef;
+  --palette-cream-100: #efeee7;
+
+  /* Беж — сайдбары, инфоблоки, «карточки данных» */
+  --palette-sand-200: #ded8c8;
+  --palette-sand-300: #cdc5b0;
+
+  /* Коричневый — навигация, иконки, акцентная графика */
+  --palette-brown-500: #8b7a62;
+  --palette-brown-700: #7a5c3e;
+
+  /* Терракота — акцент (метка Dam, ссылки, активные состояния) */
+  --palette-terracotta-500: #b05c3b;
+
+  /* Нейтральные — текст */
+  --palette-ink-900: #1a1815;
+  --palette-ink-700: #2a2723;
+  --palette-ink-400: #6f6a61;
+
+  /* --- Семантические токены ----------------------------------------- */
+
+  --color-canvas: var(--palette-olive-600);        /* поля вокруг страницы */
+  --color-surface: var(--palette-cream-50);        /* полотно страницы */
+  --color-surface-sunken: var(--palette-cream-100);
+  --color-surface-panel: var(--palette-sand-200);  /* сайдбар, блок данных */
+
+  --color-nav-bg: var(--palette-brown-500);
+  --color-nav-text: var(--palette-cream-50);
+
+  --color-text: var(--palette-ink-700);
+  --color-text-strong: var(--palette-ink-900);
+  --color-text-muted: var(--palette-ink-400);
+
+  --color-accent: var(--palette-terracotta-500);
+  --color-border: var(--palette-sand-300);
+
+  /* --- Родословная --------------------------------------------------- */
+  /*
+   * Повторяющийся предок подсвечивается: оттенок кодирует пол,
+   * насыщенность — сколько раз предок встречается в родословной.
+   * Чем ярче, тем выше инбридинг — цвет работает как тревога.
+   *
+   * ВНИМАНИЕ: на тёмных ступенях (3x, 4x) чёрный текст не читается,
+   * там нужен светлый — см. --color-pedigree-*-on.
+   */
+  --color-pedigree-female-2x: #f2cfcb;
+  --color-pedigree-female-3x: #d98c8c;
+  --color-pedigree-female-4x: #b5595e;
+
+  --color-pedigree-male-2x: #bcc4ec;
+  --color-pedigree-male-3x: #8189cc;
+  --color-pedigree-male-4x: #4a5288;
+
+  /* Цвет текста поверх ступеней подсветки */
+  --color-pedigree-on-light: var(--palette-ink-900);
+  --color-pedigree-on-dark: var(--palette-cream-50);
+
+  /* --- Статусы тестов здоровья --------------------------------------- */
+  /*
+   * Подобраны под приглушённую палитру: чистый светофор рядом с оливой
+   * и бежем выглядит инородно. Смысл важнее яркости — статус всегда
+   * дублируется словом, цветом одним кодировать нельзя.
+   */
+  --color-status-clear: #5f7a52;
+  --color-status-carrier: #b8873b;
+  --color-status-affected: #a8443c;
+  --color-status-unknown: var(--palette-ink-400);
+
+  /* --- Типографика ---------------------------------------------------- */
+  /*
+   * Пока системные стеки. Макет просит антикву в логотипе и гротеск
+   * в интерфейсе — конкретные начертания подставим, когда дизайнер
+   * отдаст файлы. Внешние CDN не подключаем: шрифты кладём локально.
+   */
+  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+  --font-script: "Playfair Display", Georgia, serif;
+}
