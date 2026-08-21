@@ -1,0 +1,23 @@
+# Единый перевод строки в репозитории — LF, всегда и для всех.
+#
+# Без этого git на Windows при checkout подставляет CRLF, и shell-скрипты
+# ломаются внутри Linux-контейнеров с ошибкой "bad interpreter: /bin/sh^M".
+# Правило действует независимо от локального core.autocrlf разработчика.
+* text=auto eol=lf
+
+# Явно: файлы, которые исполняются в контейнере
+*.sh text eol=lf
+docker-entrypoint.sh text eol=lf
+
+# Бинарные форматы конвертации не подлежат
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
+*.gz binary
+*.zip binary
