@@ -1,0 +1,47 @@
+[
+  {
+    "legacy": "Kaninchen- dachshund (teckel) kurzhaar",
+    "size": "rabbit",
+    "coat": "smooth"
+  },
+  {
+    "legacy": "Kaninchen- dachshund (teckel) langhaar",
+    "size": "rabbit",
+    "coat": "long"
+  },
+  {
+    "legacy": "Kaninchen- dachshund (teckel) rauhhaar",
+    "size": "rabbit",
+    "coat": "wire"
+  },
+  {
+    "legacy": "Zwerg-dachshund (teckel) kurzhaar",
+    "size": "miniature",
+    "coat": "smooth"
+  },
+  {
+    "legacy": "Zwerg-dachshund (teckel) langhaar",
+    "size": "miniature",
+    "coat": "long"
+  },
+  {
+    "legacy": "Zwerg-dachshund (teckel) rauhhaar",
+    "size": "miniature",
+    "coat": "wire"
+  },
+  {
+    "legacy": "Dachshund (teckel) kurzhaar",
+    "size": "standard",
+    "coat": "smooth"
+  },
+  {
+    "legacy": "Dachshund (teckel) langhaar",
+    "size": "standard",
+    "coat": "long"
+  },
+  {
+    "legacy": "Dachshund (teckel) rauhhaar",
+    "size": "standard",
+    "coat": "wire"
+  }
+]
