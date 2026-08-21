@@ -1,4 +1,4 @@
-{% load django_vite i18n %}<!doctype html>
+{% load django_vite i18n static %}<!doctype html>
 <html lang="{{ LANGUAGE_CODE|default:'ru' }}">
 <head>
   <meta charset="utf-8">
@@ -16,15 +16,28 @@
         <a class="masthead__logo" href="{% url 'core:home' %}">
           Dachshunds<em>Worldwide</em>
         </a>
-        {# Счётчик приходит из контекст-процессора: зашивать число нельзя,
-           оно устареет в тот же день, когда база вырастет. #}
+        {% comment %} Счётчик приходит из контекст-процессора: зашивать число нельзя,
+           оно устареет в тот же день, когда база вырастет. {% endcomment %}
         <div class="masthead__count">
           {% if dogs_total %}{{ dogs_total }} собак в базе{% endif %}
         </div>
       </div>
 
-      {# Место под круглую эмблему из макета. #}
-      <div class="masthead__emblem"></div>
+      <a class="masthead__emblem" href="{% url 'core:home' %}">
+        {% comment %}
+          Эмблема пока в исходном виде: квадратная картинка с вшитым
+          оливковым фоном. Круглая маска из макета делается в CSS,
+          файл для этого не трогаем.
+
+          Когда появится упрощённый вариант для малых размеров, добавить
+          сюда <source media="(max-width: 960px)"> на logo-emblem-small.png —
+          на узких экранах браузер возьмёт его сам.
+        {% endcomment %}
+        <picture>
+          <img src="{% static 'img/logo-emblem.png' %}"
+               alt="In Dachshund We Trust" width="132" height="132">
+        </picture>
+      </a>
 
       <div class="masthead__side">
         <div class="masthead__tagline">
@@ -37,9 +50,9 @@
     </header>
 
     <nav class="nav">
-      {# «AI designer» из макета сюда не вынесен: функционально это пробная
+      {% comment %} «AI designer» из макета сюда не вынесен: функционально это пробная
          вязка, она живёт в карточке собаки. Отдельный пункт меню только
-         раздвоил бы один и тот же инструмент. #}
+         раздвоил бы один и тот же инструмент. {% endcomment %}
       <ul class="nav__list">
         <li class="nav__item"><a class="nav__link" href="#">База родословных</a></li>
         <li class="nav__item"><a class="nav__link" href="#">Щенки</a></li>

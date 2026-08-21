@@ -95,8 +95,25 @@ img {
   margin-top: 0.6rem;
 }
 
+/*
+ * Эмблема. Файл — квадрат с вшитым оливковым фоном, а в макете она круглая,
+ * поэтому режем маской: фон превращается в оливковый медальон на кремовом
+ * полотне. Когда придёт вариант с прозрачностью, `border-radius` и
+ * `background` отсюда уйдут, остальное останется.
+ */
 .masthead__emblem {
+  display: block;
   width: 132px;
+  height: 132px;
+}
+
+.masthead__emblem img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  /* Кадрируем чуть выше центра: внизу картинки лента, её терять нельзя. */
+  object-position: center 60%;
 }
 
 .masthead__side {

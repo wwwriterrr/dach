@@ -120,8 +120,14 @@ USE_TZ = True
 # --- статика и медиа -----------------------------------------------------
 STATIC_URL = "/static/"
 STATIC_ROOT = REPO_ROOT / "var" / "static"
-# сюда Vite кладёт собранный бандл (см. frontend/vite.config.ts)
-STATICFILES_DIRS = [BASE_DIR / "frontend_dist"]
+STATICFILES_DIRS = [
+    # сюда Vite кладёт собранный бандл (см. frontend/vite.config.ts)
+    BASE_DIR / "frontend_dist",
+    # статика, которую отдаёт сам Django: логотипы, иконки, favicon.
+    # Через Vite их гнать незачем — они нужны шаблонам, а не островам,
+    # и шаблон не достанет хешированное имя из манифеста.
+    BASE_DIR / "static",
+]
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = REPO_ROOT / "var" / "media"
