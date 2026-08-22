@@ -2,27 +2,37 @@
 Тег для встраивания React-острова в Django-шаблон.
 
     {% load islands %}
-    {% island "demo-search" placeholder="Кличка или номер" limit=20 %}
+    {% island "dog-search" props=island_props %}
+      <form method="get">…</form>   {# серверный вариант того же самого #}
+    {% endisland %}
 
-Рендерит контейнер, который на клиенте находит frontend/src/main.tsx
-и монтирует в него компонент из реестра островов (frontend/src/islands/registry.ts).
-Имя острова должно совпадать с ключом в реестре.
+Внутрь тега кладётсяработающая серверная разметка. Она попадает
+в HTML и остаётся там для поисковых роботов и посетителей без JS.
+На клиенте main.tsx находит контейнер, берёт компонент из реестра
+(frontend/src/registry.ts) и подменяет содержимое интерактивной версией.
+
+Тег намеренно сделан блочным даже там, где запасного варианта нет:
+пустой {% island "x" %}{% endisland %} — это явно принятое решение,
+что без JS раздел не работает, а не случайно забытый запасной путь.
+Для справочника, живущего поисковым трафиком, разница существенная.
 """
 
 import json
 
 from django import template
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
 
-@register.simple_tag
-def island(name: str, **props) -> str:
-    # format_html экранирует и имя, и JSON — значения безопасны в атрибуте
-    payload = json.dumps(props, ensure_ascii=False, default=str)
+@register.simple_block_tag
+def island(content, name: str, props: dict | None = None, **kwargs) -> str:
+    # props передаются либо словарём, либо отдельными аргументами
+    payload = {**(props or {}), **kwargs}
     return format_html(
-        '<div data-island="{}" data-props="{}"></div>',
+        '<div data-island="{}" data-props="{}">{}</div>',
         name,
-        payload,
+        json.dumps(payload, ensure_ascii=False, default=str),
+        mark_safe(content),
     )

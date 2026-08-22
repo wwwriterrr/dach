@@ -1,12 +1,20 @@
 {% extends "base.html" %}
-{% load islands %}
+{% load plural %}
 
 {% block content %}
-  <h1>Каркас работает</h1>
-  <p>
-    Django отрендерил эту страницу. Блок ниже — React-остров: он смонтирован
-    в серверный HTML и получил параметры из шаблона.
-  </p>
+  <aside class="rail">
+    <div class="rail__title">Разделы</div>
+  </aside>
 
-  {% island "demo-search" placeholder="Кличка или номер регистрации" limit=20 %}
+  <div>
+    <h1 class="page-title">База родословных такс</h1>
+    <p class="lead">
+      {{ dogs_total }} {{ dogs_total|plural:"собака,собаки,собак" }} в базе.
+      <a href="{% url 'pedigree:dog-list' %}">Перейти к поиску</a>.
+    </p>
+  </div>
+
+  <aside class="rail">
+    <div class="rail__title">Последние добавленные</div>
+  </aside>
 {% endblock %}

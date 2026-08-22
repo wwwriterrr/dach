@@ -19,6 +19,7 @@ docs/legacy-audit.md: там перечень исходных полей и т�
 from django.contrib.postgres.fields import ArrayField
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
 
 
 class Sex(models.TextChoices):
@@ -298,6 +299,9 @@ class Dog(LegacyMixin):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("pedigree:dog-detail", args=[self.slug])
 
 
 class DogTitle(models.Model):

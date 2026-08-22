@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load islands plural %}
+
+{% block title %}База родословных — Dachpedigrees{% endblock %}
+
+{% block content %}
+  <aside class="rail">
+    <div class="rail__title">Разделы</div>
+  </aside>
+
+  <div>
+    <h1 class="page-title">База родословных</h1>
+
+    {% comment %}
+      Ниже — полностью серверная выдача: форма обычным GET и список
+      ссылками. На ней держится поисковый трафик, и она обязана работать
+      без единой строчки JavaScript.
+
+      Остров монтируется в этот же контейнер и подменяет содержимое
+      живой фильтрацией. Поисковый робот и посетитель без JS видят
+      серверный вариант, остальные — интерактивный.
+    {% endcomment %}
+    {% island "dog-search" props=island_props %}
+      <form class="search" method="get" action="">
+        <input class="search__input" type="search" name="q" value="{{ query }}"
+               placeholder="Кличка, питомник или номер">
+
+        <select class="search__select" name="size">
+          <option value="">любой размер</option>
+          {% for value, label in sizes %}
+            <option value="{{ value }}" {% if filters.size == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <select class="search__select" name="coat">
+          <option value="">любая шерсть</option>
+          {% for value, label in coats %}
+            <option value="{{ value }}" {% if filters.coat == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+
+        <button class="search__submit" type="submit">Искать</button>
+      </form>
+
+      <p class="search__total">
+        Найдено {{ total }} {{ total|plural:"собака,собаки,собак" }}
+      </p>
+
+      <ul class="dog-list">
+        {% for dog in page %}
+          <li class="dog-list__row">
+            <a class="dog-list__name" href="{{ dog.get_absolute_url }}">{{ dog.name }}</a>
+            <span class="dog-list__meta">
+              {% if dog.sex == 'male' %}♂{% elif dog.sex == 'female' %}♀{% endif %}
+              {{ dog.get_size_display }} {{ dog.get_coat_display }}
+              {% if dog.color %}· {{ dog.color.name }}{% endif %}
+              {% if dog.date_born %}· {{ dog.date_born|date:"Y" }}{% endif %}
+            </span>
+          </li>
+        {% empty %}
+          <li class="dog-list__empty">Ничего не найдено.</li>
+        {% endfor %}
+      </ul>
+
+      {% if page.has_other_pages %}
+        <nav class="pager">
+          {% if page.has_previous %}
+            <a href="?q={{ query }}&page={{ page.previous_page_number }}">← назад</a>
+          {% endif %}
+          <span>{{ page.number }} из {{ page.paginator.num_pages }}</span>
+          {% if page.has_next %}
+            <a href="?q={{ query }}&page={{ page.next_page_number }}">вперёд →</a>
+          {% endif %}
+        </nav>
+      {% endif %}
+    {% endisland %}
+  </div>
+
+  <aside class="rail">
+    <div class="rail__title">Реклама</div>
+  </aside>
+{% endblock %}

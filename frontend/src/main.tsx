@@ -7,6 +7,7 @@ import { islands } from "./registry";
 import "./styles/tokens.css";
 import "./styles/base.css";
 import "./styles/dog-card.css";
+import "./styles/search.css";
 
 /**
  * Точка входа островного режима.

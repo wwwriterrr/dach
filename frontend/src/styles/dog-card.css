@@ -286,3 +286,31 @@
   line-height: 1.5;
   color: var(--color-text-muted);
 }
+
+/* --- Мелочи, добавленные вместе со списком ---------------------------- */
+
+.dog__home-name {
+  margin-top: 0.3rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.dog__provenance {
+  text-align: center;
+}
+
+.photo-stack__empty {
+  width: 420px;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-panel);
+}
+
+/* Ген рядом с названием теста: справочная деталь, не должна спорить
+   с самим заболеванием за внимание. */
+.health__gene {
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}

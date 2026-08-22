@@ -1,0 +1,138 @@
+/**
+ * Список и поиск по базе.
+ *
+ * Одни и те же классы обслуживают серверную разметку и остров —
+ * иначе при подмене содержимого страница дёргалась бы.
+ */
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text-strong);
+  margin-bottom: 1.25rem;
+}
+
+.lead {
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+/* --- Строка фильтров -------------------------------------------------- */
+
+.search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+
+.search__input {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.search__input,
+.search__select,
+.search__submit {
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.search__input:focus,
+.search__select:focus {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -1px;
+}
+
+.search__submit {
+  background: var(--color-nav-bg);
+  color: var(--color-nav-text);
+  border-color: var(--color-nav-bg);
+  cursor: pointer;
+}
+
+.search__total {
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Выдача ----------------------------------------------------------- */
+
+.dog-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--color-border);
+  transition: opacity 120ms ease;
+}
+
+/* Пока идёт запрос, старая выдача гаснет, но не исчезает: список,
+   схлопывающийся в пустоту на каждое нажатие клавиши, читать невозможно. */
+.dog-list--loading {
+  opacity: 0.55;
+}
+
+.dog-list__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.75rem;
+  padding: 0.6rem 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.dog-list__name {
+  font-weight: 500;
+  color: var(--color-text-strong);
+}
+
+.dog-list__name:hover {
+  color: var(--color-accent);
+}
+
+.dog-list__meta {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.dog-list__verified {
+  margin-left: 0.4rem;
+  color: var(--color-status-clear);
+}
+
+.dog-list__empty {
+  padding: 1.5rem 0.25rem;
+  color: var(--color-text-muted);
+}
+
+/* --- Пагинация -------------------------------------------------------- */
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.pager button {
+  padding: 0.4rem 0.8rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pager button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

@@ -1,4 +1,4 @@
-{% load django_vite i18n static %}<!doctype html>
+{% load django_vite i18n static plural %}<!doctype html>
 <html lang="{{ LANGUAGE_CODE|default:'ru' }}">
 <head>
   <meta charset="utf-8">
@@ -19,7 +19,7 @@
         {% comment %} Счётчик приходит из контекст-процессора: зашивать число нельзя,
            оно устареет в тот же день, когда база вырастет. {% endcomment %}
         <div class="masthead__count">
-          {% if dogs_total %}{{ dogs_total }} собак в базе{% endif %}
+          {% if dogs_total %}{{ dogs_total }} {{ dogs_total|plural:"собака,собаки,собак" }} в базе{% endif %}
         </div>
       </div>
 
@@ -54,7 +54,7 @@
          вязка, она живёт в карточке собаки. Отдельный пункт меню только
          раздвоил бы один и тот же инструмент. {% endcomment %}
       <ul class="nav__list">
-        <li class="nav__item"><a class="nav__link" href="#">База родословных</a></li>
+        <li class="nav__item"><a class="nav__link" href="{% url 'pedigree:dog-list' %}">База родословных</a></li>
         <li class="nav__item"><a class="nav__link" href="#">Щенки</a></li>
         <li class="nav__item"><a class="nav__link" href="#">Кобели для вязки</a></li>
         <li class="nav__item"><a class="nav__link" href="#">Питомники</a></li>
