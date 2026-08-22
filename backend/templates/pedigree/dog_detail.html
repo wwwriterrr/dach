@@ -1,9 +1,10 @@
 {% extends "base.html" %}
+{% load plural %}
 
 {% block title %}{{ dog.name }} — Dachpedigrees{% endblock %}
 
 {% block content %}
-  {# Левый рельс: свежие поступления. Наполнение — позже, из базы. #}
+  {% comment %} Левый рельс: свежие поступления. Наполнение — позже. {% endcomment %}
   <aside class="rail">
     <div class="rail__title">Последние добавленные</div>
   </aside>
@@ -12,47 +13,57 @@
     <div class="frame">
       <div class="frame__inner">
 
-        {% if dog.titles %}
+        {% if show_titles %}
           <div class="dog__titles">
-            {% for title in dog.titles %}{{ title }}<br>{% endfor %}
+            {% for t in show_titles %}{{ t.title.code }}{% if not forloop.last %}, {% endif %}{% endfor %}
           </div>
         {% endif %}
 
-        <div class="dog__variety">такса {{ dog.size }} {{ dog.coat }}</div>
+        {% if dog.size or dog.coat %}
+          <div class="dog__variety">
+            такса {{ dog.get_size_display }} {{ dog.get_coat_display }}
+          </div>
+        {% endif %}
 
         <div class="dog__headline">
           <h1 class="dog__name">{{ dog.name }}</h1>
-          <span class="dog__sex" title="{% if dog.sex == 'male' %}кобель{% else %}сука{% endif %}">
-            {% if dog.sex == 'male' %}♂{% else %}♀{% endif %}
+          <span class="dog__sex" title="{{ dog.get_sex_display }}">
+            {% if dog.sex == 'male' %}♂{% elif dog.sex == 'female' %}♀{% endif %}
           </span>
         </div>
 
-        {% comment %} Метка происхождения: после слияния баз выверенная запись
-           и импортированная должны различаться с первого взгляда. {% endcomment %}
-        {% if dog.provenance %}
-          <div style="text-align: center">
-            <span class="provenance provenance--{{ dog.provenance.status }}"
-                  title="{{ dog.provenance.detail }}">
-              {{ dog.provenance.label }}
-            </span>
-          </div>
+        {% if dog.home_name %}
+          <div class="dog__home-name">домашняя кличка — {{ dog.home_name }}</div>
         {% endif %}
+
+        {% comment %}
+          Метка происхождения: после слияния баз выверенная запись
+          и импортированная должны различаться с первого взгляда.
+        {% endcomment %}
+        <div class="dog__provenance">
+          <span class="provenance provenance--{{ dog.provenance }}">
+            {{ dog.get_provenance_display }}
+          </span>
+        </div>
 
         <figure class="dog__photo">
           <div class="photo-stack">
-            {# Заглушка кадра: медиатека появится вместе с моделями. #}
-            <div style="width: 420px; aspect-ratio: 4 / 3; background: var(--color-surface-panel)"></div>
+            {% if dog.photos.all %}
+              <img src="{{ dog.photos.all.0.image.url }}" alt="{{ dog.name }}">
+            {% else %}
+              <div class="photo-stack__empty"></div>
+            {% endif %}
           </div>
         </figure>
-        <div class="dog__photo-caption">
-          {{ dog.photos_count }} фото{% if dog.has_video %} + видео{% endif %}
-        </div>
+        {% if dog.photos.all|length > 1 %}
+          <div class="dog__photo-caption">{{ dog.photos.all|length }} фото</div>
+        {% endif %}
 
         <div class="parents">
           <div class="parents__row parents__row--sire">
             <span class="parents__label">Отец:</span>
             {% if dog.sire %}
-              <a class="parents__link" href="#">{{ dog.sire.name }}</a>
+              <a class="parents__link" href="{% url 'pedigree:dog-detail' dog.sire.slug %}">{{ dog.sire.name }}</a>
             {% else %}
               <span class="parents__unknown">неизвестен</span>
             {% endif %}
@@ -60,7 +71,7 @@
           <div class="parents__row parents__row--dam">
             <span class="parents__label">Мать:</span>
             {% if dog.dam %}
-              <a class="parents__link" href="#">{{ dog.dam.name }}</a>
+              <a class="parents__link" href="{% url 'pedigree:dog-detail' dog.dam.slug %}">{{ dog.dam.name }}</a>
             {% else %}
               <span class="parents__unknown">неизвестна</span>
             {% endif %}
@@ -69,58 +80,79 @@
 
         <div class="passport">
           <dl class="passport__grid">
-            <dt>NID</dt><dd>{{ dog.nid }}</dd>
-            <dt>Рождение</dt><dd>{{ dog.date_born|date:"d.m.Y" }}</dd>
-            {% if dog.date_death %}
-              <dt>Смерть</dt><dd>{{ dog.date_death|date:"d.m.Y" }}</dd>
-            {% endif %}
-            <dt>Окрас</dt><dd>{{ dog.color }}</dd>
-            <dt>Микрочип</dt><dd>{{ dog.microchip }}</dd>
-            <dt>Клеймо</dt><dd>{{ dog.tattoo }}</dd>
-            <dt>Вес</dt><dd>{% if dog.weight_kg %}{{ dog.weight_kg }} кг{% endif %}</dd>
-            <dt>Обхват груди</dt><dd>{% if dog.chest_cm %}{{ dog.chest_cm }} см{% endif %}</dd>
+            {% if dog.legacy_id %}<dt>NID</dt><dd>{{ dog.legacy_id }}</dd>{% endif %}
+            {% if dog.date_born %}<dt>Рождение</dt><dd>{{ dog.date_born|date:"d.m.Y" }}</dd>{% endif %}
+            {% if dog.date_died %}<dt>Смерть</dt><dd>{{ dog.date_died|date:"d.m.Y" }}</dd>{% endif %}
+            {% if dog.color %}<dt>Окрас</dt><dd>{{ dog.color.name }}</dd>{% endif %}
+            {% if dog.microchip %}<dt>Микрочип</dt><dd>{{ dog.microchip }}</dd>{% endif %}
+            {% if dog.tattoo %}<dt>Клеймо</dt><dd>{{ dog.tattoo }}</dd>{% endif %}
+            {% if dog.weight_kg %}<dt>Вес</dt><dd>{{ dog.weight_kg }} кг</dd>{% endif %}
+            {% if dog.chest_cm %}<dt>Обхват груди</dt><dd>{{ dog.chest_cm }} см</dd>{% endif %}
           </dl>
 
-          {# Регистраций может быть несколько — разные организации. #}
-          {% if dog.registrations %}
+          {% if dog.registrations.all %}
             <div class="passport__section">
               <div class="passport__section-title">Регистрации</div>
               <dl class="passport__grid">
-                {% for reg in dog.registrations %}
+                {% for reg in dog.registrations.all %}
                   <dt>{{ reg.organisation }}</dt><dd>{{ reg.number }}</dd>
                 {% endfor %}
               </dl>
             </div>
           {% endif %}
 
-          <div class="passport__section">
-            <div class="passport__section-title">Заводчик и владелец</div>
-            <dl class="passport__grid">
-              <dt>Заводчик</dt><dd>{{ dog.breeder }}</dd>
-              <dt>Владелец</dt><dd>{{ dog.owner }}</dd>
-            </dl>
-          </div>
+          {% if dog.breeder or dog.owner or dog.kennel %}
+            <div class="passport__section">
+              <div class="passport__section-title">Заводчик и владелец</div>
+              <dl class="passport__grid">
+                {% if dog.breeder %}<dt>Заводчик</dt><dd>{{ dog.breeder.name }}</dd>{% endif %}
+                {% if dog.owner %}<dt>Владелец</dt><dd>{{ dog.owner.name }}</dd>{% endif %}
+                {% if dog.kennel %}<dt>Питомник</dt><dd>{{ dog.kennel.name }}</dd>{% endif %}
+              </dl>
+            </div>
+          {% endif %}
+
+          {% if field_titles or other_titles %}
+            <div class="passport__section">
+              <div class="passport__section-title">Прочие титулы</div>
+              <dl class="passport__grid">
+                {% if field_titles %}
+                  <dt>Полевые</dt>
+                  <dd>{% for t in field_titles %}{{ t.title.code }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+                {% endif %}
+                {% if other_titles %}
+                  <dt>Прочие</dt>
+                  <dd>{% for t in other_titles %}{{ t.title.code }}{% if not forloop.last %}, {% endif %}{% endfor %}</dd>
+                {% endif %}
+              </dl>
+            </div>
+          {% endif %}
         </div>
 
       </div>
     </div>
 
-    {% comment %} Здоровье поднято из ряда иконок в самостоятельный блок:
-       по нему подбирают пару, ради него сюда и приходят. {% endcomment %}
+    {% comment %}
+      Здоровье поднято из ряда одинаковых иконок в самостоятельный блок:
+      это главный дифференциатор проекта, по нему подбирают пару.
+    {% endcomment %}
     <section class="health">
       <h2 class="section-title">Здоровье</h2>
-      {% if dog.health %}
+      {% if dog.health_tests.all %}
         <ul class="health__list">
-          {% for test in dog.health %}
-            <li class="health__row health__row--{{ test.status }}">
+          {% for test in dog.health_tests.all %}
+            <li class="health__row health__row--{{ test.result }}">
               <div>
-                <div class="health__name">{{ test.title }}</div>
+                <div class="health__name">
+                  {{ test.disease.name }}{% if test.disease.gene %} <span class="health__gene">{{ test.disease.gene }}</span>{% endif %}
+                </div>
                 <div class="health__meta">
-                  {{ test.lab }}, {{ test.tested_on|date:"d.m.Y" }}
+                  {% if test.lab %}{{ test.lab }}{% else %}лаборатория не указана{% endif %}{% if test.tested_on %}, {{ test.tested_on|date:"d.m.Y" }}{% endif %}
+                  {% if test.verified %} · подтверждено документом{% endif %}
                 </div>
               </div>
-              <span class="health__genotype">{{ test.genotype }}</span>
-              <span class="health__status">{{ test.status_label }}</span>
+              {% if test.genotype %}<span class="health__genotype">{{ test.genotype }}</span>{% endif %}
+              <span class="health__status">{{ test.get_result_display }}</span>
             </li>
           {% endfor %}
         </ul>
@@ -132,36 +164,47 @@
     <section class="facets">
       <div>
         <div class="facet__icon"></div>
-        <div class="facet__name">Полевые испытания</div>
-        <div class="facet__meta">Всего: {{ dog.field_trials.total }}</div>
-      </div>
-      <div>
-        <div class="facet__icon"></div>
         <div class="facet__name">Однопомётники</div>
         <div class="facet__meta">
-          Всего: {{ dog.siblings.total }}<br>
-          {{ dog.siblings.males }} кобелей, {{ dog.siblings.females }} сук
+          {% if siblings_stats.total %}
+            Всего: {{ siblings_stats.total }}<br>
+            {{ siblings_stats.males }} {{ siblings_stats.males|plural:"кобель,кобеля,кобелей" }},
+            {{ siblings_stats.females }} {{ siblings_stats.females|plural:"сука,суки,сук" }}
+          {% else %}нет данных{% endif %}
         </div>
       </div>
       <div>
         <div class="facet__icon"></div>
         <div class="facet__name">Потомство</div>
-        <div class="facet__meta">Всего: {{ dog.offspring.total }}</div>
+        <div class="facet__meta">
+          {% if offspring_total %}Всего: {{ offspring_total }}{% else %}нет данных{% endif %}
+        </div>
+      </div>
+      <div>
+        <div class="facet__icon"></div>
+        <div class="facet__name">Помёт</div>
+        <div class="facet__meta">
+          {% if dog.litter %}
+            {{ dog.litter.letter }}{% if dog.litter.date_born %}, {{ dog.litter.date_born|date:"d.m.Y" }}{% endif %}
+          {% else %}нет данных{% endif %}
+        </div>
       </div>
     </section>
 
-    {# Следующий заход: дерево родословной (остров) и пробная вязка. #}
+    {% comment %} Следующий заход: дерево родословной (остров) и пробная вязка. {% endcomment %}
   </article>
 
-  {% comment %} Правый рельс: вместо рекламы из макета — COI. Это то, ради чего
-     заводчик открыл страницу; рекламный блок стоил бы лучшего места. {% endcomment %}
+  {% comment %}
+    Правый рельс: вместо рекламы из макета — COI. Это то, ради чего
+    заводчик открыл страницу; рекламный блок стоил бы лучшего места.
+  {% endcomment %}
   <aside class="rail">
     <div class="rail__title">Инбридинг</div>
     {% if dog.coi %}
-      <div class="coi__value">{{ dog.coi.value }}%</div>
+      <div class="coi__value">{{ dog.coi.value|floatformat:2 }}%</div>
       <div class="coi__meta">
         за {{ dog.coi.generations }} поколений<br>
-        известно предков: {{ dog.coi.known_ancestors }}%<br>
+        известно предков: {{ dog.coi.known_ancestors|floatformat:1 }}%<br>
         расчёт {{ dog.coi.calculated_at|date:"d.m.Y" }}
       </div>
     {% else %}

@@ -71,7 +71,13 @@ GIVEN_F = [
     "Jacqueline", "Naomi", "Rihanna", "Leonsia", "Courage", "Idoliz", "Fifa",
     "Stunning", "Wee Wonder", "Girl", "Dakota", "Pampa", "Medovaya Radost",
 ]
-HOME_NAMES = ["Гера", "Винни", "Тима", "Люся", "Барон", "Марта", "", "", ""]
+HOME_NAMES_M = ["Винни", "Тима", "Барон", "Гоша", "", "", ""]
+HOME_NAMES_F = ["Гера", "Люся", "Марта", "Ника", "", "", ""]
+# Пары имя-фамилия держим согласованными по роду: «Марина Смирнов»
+# в демо-данных выглядит небрежностью и мешает верстать.
+PEOPLE_M = [("Василий", "Иванов"), ("Дмитрий", "Смирнов"), ("Сергей", "Новак")]
+PEOPLE_F = [("Виктория", "Иванова"), ("Анна", "Петрова"), ("Ольга", "Ковалёва"),
+            ("Марина", "Смирнова")]
 LABS = ["Laboklin", "Zoogen", "Antagene", "Embark", ""]
 ORGS = ["РКФ", "FCI", "AKC", "KC", "VDH"]
 
@@ -161,11 +167,9 @@ class Command(BaseCommand):
         return out
 
     def _people(self, rnd, kennels, countries):
-        first = ["Виктория", "Василий", "Анна", "Дмитрий", "Ольга", "Сергей", "Марина"]
-        last = ["Иванова", "Иванов", "Петрова", "Смирнов", "Ковалёва", "Новак"]
         out = []
         for i in range(40):
-            name = f"{rnd.choice(first)} {rnd.choice(last)}"
+            name = " ".join(rnd.choice(PEOPLE_M if rnd.random() < 0.4 else PEOPLE_F))
             kennel = rnd.choice(kennels) if rnd.random() < 0.7 else None
             out.append(Person.objects.create(
                 name=name, slug=self._slug(name, "person", i),
@@ -223,7 +227,7 @@ class Command(BaseCommand):
                     name = f"{rnd.choice(PREFIXES)} {rnd.choice(GIVEN_M if sex == Sex.MALE else GIVEN_F)}"
                     dog = Dog.objects.create(
                         name=name, slug=self._slug(name, "dog", counter),
-                        home_name=rnd.choice(HOME_NAMES),
+                        home_name=rnd.choice(HOME_NAMES_M if sex == Sex.MALE else HOME_NAMES_F),
                         sex=sex,
                         size=rnd.choice(list(Size.values)),
                         coat=rnd.choice(list(Coat.values)),
@@ -292,11 +296,25 @@ class Command(BaseCommand):
             for disease in rnd.sample(diseases, rnd.randint(1, len(diseases))):
                 if disease.relevant_coats and dog.coat not in disease.relevant_coats:
                     continue
-                result = rnd.choices(
-                    [HealthResult.CLEAR, HealthResult.CARRIER, HealthResult.AFFECTED],
-                    weights=[65, 25, 10],
-                )[0]
-                genotype = {"clear": "N/N", "carrier": "N/L", "affected": "L/L"}[result]
+
+                if disease.code == "m-locus":
+                    # Локус M обязан сходиться с окрасом: дапл — это и есть
+                    # носительство M, двойной дапл — гомозигота M/M.
+                    # Демо-данные, противоречащие генетике, обесценивают
+                    # весь модуль здоровья: на них нельзя проверить
+                    # ни пробную вязку, ни подсветку опасных сочетаний.
+                    if dog.color and dog.color.is_double_dapple:
+                        result, genotype = HealthResult.AFFECTED, "M/M"
+                    elif dog.color and dog.color.is_dapple:
+                        result, genotype = HealthResult.CARRIER, "M/m"
+                    else:
+                        result, genotype = HealthResult.CLEAR, "m/m"
+                else:
+                    result = rnd.choices(
+                        [HealthResult.CLEAR, HealthResult.CARRIER, HealthResult.AFFECTED],
+                        weights=[65, 25, 10],
+                    )[0]
+                    genotype = {"clear": "N/N", "carrier": "N/L", "affected": "L/L"}[result]
                 HealthTest.objects.get_or_create(
                     dog=dog, disease=disease,
                     tested_on=date(2015, 1, 1) + timedelta(days=rnd.randint(0, 3800)),

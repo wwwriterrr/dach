@@ -5,6 +5,5 @@ from . import views
 app_name = "pedigree"
 
 urlpatterns = [
-    # Временный адрес для показа вёрстки; настоящий будет /dog/<slug>/
-    path("dog/sample/", views.sample_dog, name="sample-dog"),
+    path("dog/<slug:slug>/", views.dog_detail, name="dog-detail"),
 ]
