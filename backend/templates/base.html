@@ -4,6 +4,14 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Dachpedigrees{% endblock %}</title>
+  {% comment %}
+    Преамбула Fast Refresh. В обычном проекте на Vite её вставляет
+    @vitejs/plugin-react в свой index.html, но HTML здесь рендерит
+    Django — без этого тега плагин не находит преамбулу и остров
+    падает с «can't detect preamble». Обязан идти до vite_asset.
+    В прод-сборке тег не выводит ничего.
+  {% endcomment %}
+  {% vite_react_refresh %}
   {% vite_hmr_client %}
   {% vite_asset 'src/main.tsx' %}
   {% block head %}{% endblock %}
