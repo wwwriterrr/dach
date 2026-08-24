@@ -35,15 +35,27 @@
              style="--col: {{ node.col }}; --row: {{ node.row_start }}; --span: {{ node.row_span }}"
              {% if node.dog %}data-dog="{{ node.dog.id }}"{% endif %}>
           {% if node.dog %}
-            <a class="pedigree__name" href="{{ node.dog.url }}">{{ node.dog.name }}</a>
-
-            {% if node.dog.titles %}
-              <div class="pedigree__titles">{{ node.dog.titles|join:", " }}</div>
+            {% comment %}
+              Фото показываем только там, где ячейка достаточно высокая.
+              В последнем поколении она в одну строку — снимок туда
+              не влезет, а ужимать его до неразличимости незачем.
+            {% endcomment %}
+            {% if node.dog.photo and node.row_span >= 2 %}
+              <img class="pedigree__photo" src="{{ node.dog.photo }}"
+                   alt="" loading="lazy" width="44" height="33">
             {% endif %}
 
-            <div class="pedigree__meta">
-              {% if node.dog.color %}{{ node.dog.color }}{% endif %}
-              {% if node.dog.born %} · {{ node.dog.born }}{% endif %}
+            <div class="pedigree__body">
+              <a class="pedigree__name" href="{{ node.dog.url }}">{{ node.dog.name }}</a>
+
+              {% if node.dog.titles %}
+                <div class="pedigree__titles">{{ node.dog.titles|join:", " }}</div>
+              {% endif %}
+
+              <div class="pedigree__meta">
+                {% if node.dog.color %}{{ node.dog.color }}{% endif %}
+                {% if node.dog.born %} · {{ node.dog.born }}{% endif %}
+              </div>
             </div>
 
             {% if node.dog.repeat_level %}

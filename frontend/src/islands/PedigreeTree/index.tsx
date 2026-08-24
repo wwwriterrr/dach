@@ -35,6 +35,7 @@ type Node = {
     color: string;
     born: number | null;
     titles: string[];
+    photo: string | null;
     health: "clear" | "carrier" | "affected" | null;
     repeat: number;
     repeat_level: number | null;
@@ -176,15 +177,24 @@ export default function PedigreeTree({ endpoint, depths, initial }: Props) {
               >
                 {dog ? (
                   <>
-                    <a className="pedigree__name" href={dog.url}>{dog.name}</a>
-
-                    {dog.titles.length > 0 && (
-                      <div className="pedigree__titles">{dog.titles.join(", ")}</div>
+                    {/* Фото только там, где ячейка достаточно высокая:
+                        в последнем поколении она в одну строку. */}
+                    {dog.photo && node.row_span >= 2 && (
+                      <img className="pedigree__photo" src={dog.photo}
+                           alt="" loading="lazy" width={44} height={33} />
                     )}
 
-                    <div className="pedigree__meta">
-                      {dog.color}
-                      {dog.born ? ` · ${dog.born}` : ""}
+                    <div className="pedigree__body">
+                      <a className="pedigree__name" href={dog.url}>{dog.name}</a>
+
+                      {dog.titles.length > 0 && (
+                        <div className="pedigree__titles">{dog.titles.join(", ")}</div>
+                      )}
+
+                      <div className="pedigree__meta">
+                        {dog.color}
+                        {dog.born ? ` · ${dog.born}` : ""}
+                      </div>
                     </div>
 
                     {dog.repeat_level && (

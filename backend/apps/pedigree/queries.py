@@ -86,7 +86,7 @@ def build_pedigree(root, generations: int) -> dict:
         dog.pk: dog
         for dog in Dog.objects.filter(pk__in=by_position.values())
         .select_related("color")
-        .prefetch_related("dog_titles__title", "health_tests__disease")
+        .prefetch_related("dog_titles__title", "health_tests__disease", "photos")
     }
 
     # Сколько раз каждый предок встречается в дереве. Корень не в счёт:
@@ -143,6 +143,10 @@ def _node_payload(dog, counts: dict) -> dict:
     # Сводка по здоровью одним значением — худший известный результат.
     # У конкурента здоровья нет вовсе, а заводчику важно видеть проблему
     # прямо в дереве, а не открывая каждого предка по очереди.
+    # Первое фото — оно же основное: Photo.Meta сортирует is_primary вперёд.
+    photos = list(dog.photos.all())
+    photo = photos[0].image.url if photos else None
+
     results = {test.result for test in dog.health_tests.all()}
     if "affected" in results:
         health = "affected"
@@ -165,6 +169,7 @@ def _node_payload(dog, counts: dict) -> dict:
             "color": dog.color.name if dog.color else "",
             "born": dog.date_born.year if dog.date_born else None,
             "titles": [t.title.code for t in dog.dog_titles.all()][:6],
+            "photo": photo,
             "health": health,
             "repeat": repeat,
             "repeat_level": level,

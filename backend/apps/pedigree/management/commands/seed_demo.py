@@ -15,15 +15,18 @@
 предки, ради которых существует шкала подсветки.
 """
 
+import io
 import random
 from datetime import date, timedelta
 from pathlib import Path
 
+from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.utils.text import slugify
 
 from apps.pedigree.models import (
+    Photo,
     Coat, Coi, Color, Country, Disease, Dog, DogTitle, HealthResult, HealthTest,
     Kennel, Litter, Person, Provenance, Registration, Sex, Size, Title, TitleKind,
 )
@@ -108,19 +111,20 @@ class Command(BaseCommand):
         self._titles_for_dogs(rnd, dogs, titles)
         self._registrations(rnd, dogs)
         self._health(rnd, dogs, diseases)
+        self._photos(rnd, dogs)
         self._coi(rnd, dogs)
         self._dirt(rnd, colors)
 
         self.stdout.write(self.style.SUCCESS(
             f"готово: {Dog.objects.count()} собак, {Litter.objects.count()} помётов, "
-            f"{HealthTest.objects.count()} тестов, {Person.objects.count()} человек, "
-            f"{Kennel.objects.count()} питомников"
+            f"{HealthTest.objects.count()} тестов, {Photo.objects.count()} фото, "
+            f"{Person.objects.count()} человек, {Kennel.objects.count()} питомников"
         ))
 
     # --- очистка ---------------------------------------------------------
 
     def _flush(self):
-        for model in (Coi, HealthTest, Registration, DogTitle, Dog, Litter,
+        for model in (Coi, HealthTest, Registration, DogTitle, Photo, Dog, Litter,
                       Person, Kennel, Disease, Color, Title, Country):
             model.objects.all().delete()
         self.stdout.write("прежние данные стёрты")
@@ -338,6 +342,50 @@ class Command(BaseCommand):
                     "ancestor_loss": round(rnd.uniform(0, 40), 2),
                 },
             )
+
+    def _photos(self, rnd, dogs):
+        """
+        Рисуем заглушки вместо фотографий.
+
+        Настоящих снимков взять негде, а без картинок нельзя проверить
+        ни плотность ячеек в родословной, ни поведение карточки. Рисуем
+        простой прямоугольник в цвет окраса с инициалами — этого хватает,
+        чтобы увидеть раскладку честно.
+
+        Заполненность как в легаси: там фото было примерно у трёх собак
+        из четырёх, но далеко не у всех.
+        """
+        from PIL import Image, ImageDraw
+
+        palette = {
+            "рыжий": (170, 92, 40), "кремовый": (214, 194, 152),
+            "чёрно-подпалый": (48, 40, 34), "шоколадно-подпалый": (92, 58, 38),
+            "кабаний": (120, 104, 78),
+        }
+
+        created = 0
+        for dog in dogs:
+            if rnd.random() > 0.55:
+                continue
+
+            base = palette.get(dog.color.name if dog.color else "", (128, 118, 96))
+            # лёгкий разброс, чтобы кадры не выглядели штампованными
+            fill = tuple(max(0, min(255, c + rnd.randint(-18, 18))) for c in base)
+
+            image = Image.new("RGB", (320, 240), fill)
+            draw = ImageDraw.Draw(image)
+            initials = "".join(w[0] for w in dog.name.split()[:2]).upper()
+            draw.rectangle([8, 8, 311, 231], outline=(255, 255, 255), width=2)
+            draw.text((150, 112), initials, fill=(255, 255, 255))
+
+            buffer = io.BytesIO()
+            image.save(buffer, format="JPEG", quality=70)
+
+            photo = Photo(dog=dog, is_primary=True, caption=dog.name)
+            photo.image.save(f"{dog.slug}.jpg", ContentFile(buffer.getvalue()), save=True)
+            created += 1
+
+        self.stdout.write(f"нарисовано заглушек фото: {created}")
 
     # --- грязь -----------------------------------------------------------
 

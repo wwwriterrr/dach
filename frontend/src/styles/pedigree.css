@@ -88,10 +88,12 @@
   grid-column: var(--col);
   grid-row: var(--row) / span var(--span);
   position: relative;
+  /* Ряд: слева снимок, справа текст. Содержимое центрируется по высоте —
+     в родословной родитель обязан стоять посередине между потомками,
+     иначе «гребень» рассыпается. */
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.45rem;
   padding: 0.4rem 0.55rem;
   background: var(--color-surface-sunken);
   border: 1px solid var(--color-border);
@@ -165,6 +167,17 @@
 .pedigree__cell--repeat-female-4 {
   background: var(--color-pedigree-female-4x);
   color: var(--color-pedigree-on-dark);
+}
+
+/*
+ * Приглушённый серый подписей рассчитан на кремовый фон. Поверх заливки
+ * он проваливается, поэтому на любой подсвеченной ячейке подписи темнеют
+ * до основного цвета текста.
+ */
+.pedigree__cell[class*="--repeat-"] .pedigree__titles,
+.pedigree__cell[class*="--repeat-"] .pedigree__meta,
+.pedigree__cell[class*="--repeat-"] .pedigree__repeat {
+  color: var(--palette-ink-700);
 }
 
 /* На тёмных ступенях светлеет всё, включая ссылку и подписи. */
@@ -271,4 +284,30 @@
   .pedigree-block {
     padding: 0 1rem 3rem;
   }
+}
+
+/* --- Фотография в ячейке ----------------------------------------------- */
+/*
+ * Маленькая, слева от клички. В легаси снимки в родословной были,
+ * и заводчики по ним ориентируются быстрее, чем по тексту: тип и окрас
+ * видно сразу.
+ *
+ * Показываем не везде: в последнем поколении ячейка высотой в одну
+ * строку, и снимок туда не влезает. Условие в шаблоне — row_span >= 2.
+ */
+
+.pedigree__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.pedigree__photo {
+  flex: none;
+  width: 44px;
+  height: 33px;
+  object-fit: cover;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-panel);
 }

@@ -120,7 +120,10 @@ USE_TZ = True
 
 # --- статика и медиа -----------------------------------------------------
 STATIC_URL = "/static/"
-STATIC_ROOT = REPO_ROOT / "var" / "static"
+# Пути задаются переменными окружения, а не выводятся от REPO_ROOT:
+# в контейнере наружу примонтирован только backend/, поэтому REPO_ROOT
+# схлопывается в корень файловой системы и «var/media» уезжает мимо тома.
+STATIC_ROOT = Path(env("DJANGO_STATIC_ROOT", str(REPO_ROOT / "var" / "static")))
 STATICFILES_DIRS = [
     # сюда Vite кладёт собранный бандл (см. frontend/vite.config.ts)
     BASE_DIR / "frontend_dist",
@@ -131,7 +134,7 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_URL = "/media/"
-MEDIA_ROOT = REPO_ROOT / "var" / "media"
+MEDIA_ROOT = Path(env("DJANGO_MEDIA_ROOT", str(REPO_ROOT / "var" / "media")))
 
 # --- Vite / React-острова ------------------------------------------------
 DJANGO_VITE = {
