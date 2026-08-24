@@ -11,8 +11,15 @@
  * расставляет по --col / --row / --span.
  */
 
+/*
+ * Блок вынесен из трёхколоночной сетки (base.html, block wide):
+ * в центральной колонке оставалось ~660px, а шести поколениям нужно
+ * вдвое больше. Отступы повторяют горизонтальные отступы .layout,
+ * чтобы таблица стояла по одной линии с остальным содержимым.
+ */
 .pedigree-block {
-  margin-top: 2.5rem;
+  margin-top: 1rem;
+  padding: 0 2.5rem 4rem;
 }
 
 .pedigree-block__head {
@@ -67,10 +74,12 @@
 
 .pedigree {
   display: grid;
-  grid-template-columns: repeat(var(--generations), minmax(150px, 1fr));
-  grid-template-rows: repeat(var(--rows), minmax(2.6rem, auto));
+  /* Столбец ужимается до 130px только когда поколений много и экран узок;
+     при 3-4 поколениях колонки растягиваются и дышат. */
+  grid-template-columns: repeat(var(--generations), minmax(130px, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(2.4rem, auto));
   gap: 3px;
-  min-width: 640px;
+  min-width: min(100%, calc(var(--generations) * 130px));
 }
 
 /* --- Ячейка ----------------------------------------------------------- */
@@ -255,4 +264,11 @@
 
 .pedigree-block__back:hover {
   text-decoration: underline;
+}
+
+
+@media (max-width: 960px) {
+  .pedigree-block {
+    padding: 0 1rem 3rem;
+  }
 }

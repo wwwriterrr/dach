@@ -254,6 +254,12 @@
   text-align: center;
 }
 
+/* Пока иконок нет, место под них не занимаем: пустой блок в 64px
+   читается как дыра в вёрстке. Появятся файлы — вернуть высоту. */
+.facet__icon:empty {
+  display: none;
+}
+
 .facet__icon {
   height: 64px;
   margin: 0 auto 0.75rem;

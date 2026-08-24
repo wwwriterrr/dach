@@ -191,9 +191,6 @@
       </div>
     </section>
 
-    {% island "pedigree-tree" props=pedigree_props %}
-      {% include "pedigree/_pedigree.html" %}
-    {% endisland %}
   </article>
 
   {% comment %}
@@ -213,4 +210,10 @@
       <div class="coi__meta">не рассчитан</div>
     {% endif %}
   </aside>
+{% endblock %}
+
+{% block wide %}
+  {% island "pedigree-tree" props=pedigree_props %}
+    {% include "pedigree/_pedigree.html" %}
+  {% endisland %}
 {% endblock %}
