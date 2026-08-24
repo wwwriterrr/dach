@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load plural %}
+{% load plural islands %}
 
 {% block title %}{{ dog.name }} — Dachpedigrees{% endblock %}
 
@@ -191,7 +191,9 @@
       </div>
     </section>
 
-    {% comment %} Следующий заход: дерево родословной (остров) и пробная вязка. {% endcomment %}
+    {% island "pedigree-tree" props=pedigree_props %}
+      {% include "pedigree/_pedigree.html" %}
+    {% endisland %}
   </article>
 
   {% comment %}

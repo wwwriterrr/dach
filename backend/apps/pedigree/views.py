@@ -6,8 +6,23 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 
 from .models import Coat, Dog, DogTitle, HealthTest, Registration, Sex, Size
+from .queries import build_pedigree
 
 PAGE_SIZE = 24
+
+# Глубина родословной: сколько поколений предков показывать.
+# Три значения — как в макете и у конкурента.
+PEDIGREE_DEPTHS = (3, 4, 5)
+DEFAULT_DEPTH = 4
+
+
+def pedigree_depth(params) -> int:
+    """Глубина из запроса, с защитой от произвольных значений в адресе."""
+    try:
+        depth = int(params.get("generations", DEFAULT_DEPTH))
+    except (TypeError, ValueError):
+        return DEFAULT_DEPTH
+    return depth if depth in PEDIGREE_DEPTHS else DEFAULT_DEPTH
 
 
 def search_dogs(params):
@@ -135,8 +150,18 @@ def dog_detail(request, slug):
 
     offspring = Dog.objects.filter(Q(sire=dog) | Q(dam=dog))
 
+    depth = pedigree_depth(request.GET)
+    pedigree = build_pedigree(dog, depth)
+
     return render(request, "pedigree/dog_detail.html", {
         "dog": dog,
+        "pedigree": pedigree,
+        "pedigree_depths": PEDIGREE_DEPTHS,
+        "pedigree_props": {
+            "endpoint": reverse("pedigree:pedigree-api", args=[dog.slug]),
+            "depths": list(PEDIGREE_DEPTHS),
+            "initial": pedigree,
+        },
         "siblings": siblings,
         "siblings_stats": siblings.aggregate(
             total=Count("pk"),
@@ -150,3 +175,9 @@ def dog_detail(request, slug):
         "field_titles": [t for t in dog.dog_titles.all() if t.title.kind == "field"],
         "other_titles": [t for t in dog.dog_titles.all() if t.title.kind == "other"],
     })
+
+
+def pedigree_api(request, slug):
+    """JSON родословной для острова: смена глубины без перезагрузки страницы."""
+    dog = get_object_or_404(Dog, slug=slug)
+    return JsonResponse(build_pedigree(dog, pedigree_depth(request.GET)))

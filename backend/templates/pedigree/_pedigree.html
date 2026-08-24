@@ -1,0 +1,82 @@
+{% comment %}
+  Серверный вариант родословной.
+
+  Лежит отдельным файлом, потому что вставляется внутрь {% island %}
+  как запасной путь: его видят поисковые роботы и посетители без JS.
+  Клички здесь — обычные ссылки, глубина переключается обычными ссылками,
+  всё работает без единой строчки JavaScript.
+
+  Раскладка приходит готовой из build_pedigree: столбец, начальная строка
+  и высота посчитаны на сервере, CSS остаётся только расставить.
+{% endcomment %}
+
+<div class="pedigree-block">
+  <div class="pedigree-block__head">
+    <h2 class="section-title">Родословная</h2>
+
+    <div class="pedigree-block__tools">
+      <span class="pedigree-block__label">поколений:</span>
+      {% for depth in pedigree_depths %}
+        <a class="depth-switch{% if depth == pedigree.generations %} depth-switch--active{% endif %}"
+           href="?generations={{ depth }}">{{ depth }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  <p class="pedigree-block__stats">
+    Известно {{ pedigree.known }} из {{ pedigree.possible }} предков —
+    <strong>{{ pedigree.completeness }}%</strong>
+  </p>
+
+  <div class="pedigree-scroll">
+    <div class="pedigree" style="--generations: {{ pedigree.generations|add:1 }}; --rows: {{ pedigree.total_rows }}">
+      {% for node in pedigree.nodes %}
+        <div class="pedigree__cell{% if not node.dog %} pedigree__cell--empty{% endif %}{% if node.dog.repeat_level %} pedigree__cell--repeat-{{ node.dog.sex }}-{{ node.dog.repeat_level }}{% endif %}"
+             style="--col: {{ node.col }}; --row: {{ node.row_start }}; --span: {{ node.row_span }}"
+             {% if node.dog %}data-dog="{{ node.dog.id }}"{% endif %}>
+          {% if node.dog %}
+            <a class="pedigree__name" href="{{ node.dog.url }}">{{ node.dog.name }}</a>
+
+            {% if node.dog.titles %}
+              <div class="pedigree__titles">{{ node.dog.titles|join:", " }}</div>
+            {% endif %}
+
+            <div class="pedigree__meta">
+              {% if node.dog.color %}{{ node.dog.color }}{% endif %}
+              {% if node.dog.born %} · {{ node.dog.born }}{% endif %}
+            </div>
+
+            {% if node.dog.repeat_level %}
+              <span class="pedigree__repeat" title="встречается в родословной {{ node.dog.repeat }} раза">
+                ×{{ node.dog.repeat }}
+              </span>
+            {% endif %}
+
+            {% comment %}
+              Отметка здоровья прямо в дереве. У конкурента её нет вовсе,
+              а заводчику важно видеть проблему в предках сразу, не открывая
+              каждого по очереди.
+            {% endcomment %}
+            {% if node.dog.health %}
+              <span class="pedigree__health pedigree__health--{{ node.dog.health }}"
+                    title="{{ node.dog.health }}"></span>
+            {% endif %}
+          {% else %}
+            <span class="pedigree__unknown">неизвестен</span>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if pedigree.repeats %}
+    <ul class="pedigree-legend">
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--male-2"></span> кобель дважды</li>
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--male-3"></span> трижды</li>
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--male-4"></span> четырежды и чаще</li>
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--female-2"></span> сука дважды</li>
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--female-3"></span> трижды</li>
+      <li><span class="pedigree-legend__swatch pedigree-legend__swatch--female-4"></span> четырежды и чаще</li>
+    </ul>
+  {% endif %}
+</div>

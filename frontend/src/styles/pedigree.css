@@ -1,0 +1,258 @@
+/**
+ * Родословная.
+ *
+ * Главный визуальный элемент справочника, поэтому решения тут
+ * осознанные, а не «как получилось».
+ *
+ * Классический «гребень» собран обычной сеткой: поколение занимает
+ * столбец, а по высоте ячейка растягивается на 2^(G-g) строк. Никаких
+ * вложенных таблиц — они не переносятся на узкие экраны и недоступны
+ * с клавиатуры. Раскладку считает сервер (build_pedigree), CSS только
+ * расставляет по --col / --row / --span.
+ */
+
+.pedigree-block {
+  margin-top: 2.5rem;
+}
+
+.pedigree-block__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.pedigree-block__tools {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pedigree-block__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.depth-switch {
+  min-width: 2rem;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: 0.85rem;
+  text-align: center;
+  cursor: pointer;
+}
+
+.depth-switch--active {
+  background: var(--color-nav-bg);
+  border-color: var(--color-nav-bg);
+  color: var(--color-nav-text);
+}
+
+.pedigree-block__stats {
+  margin: 0.5rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* На узком экране пять поколений в ширину не влезают никогда.
+   Горизонтальная прокрутка честнее, чем сжимать клички до нечитаемости. */
+.pedigree-scroll {
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.pedigree {
+  display: grid;
+  grid-template-columns: repeat(var(--generations), minmax(150px, 1fr));
+  grid-template-rows: repeat(var(--rows), minmax(2.6rem, auto));
+  gap: 3px;
+  min-width: 640px;
+}
+
+/* --- Ячейка ----------------------------------------------------------- */
+
+.pedigree__cell {
+  grid-column: var(--col);
+  grid-row: var(--row) / span var(--span);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.4rem 0.55rem;
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  font-size: 0.8rem;
+  overflow: hidden;
+}
+
+.pedigree__cell--empty {
+  background: transparent;
+  border-style: dashed;
+}
+
+.pedigree__name {
+  font-weight: 500;
+  color: var(--color-text-strong);
+  line-height: 1.25;
+}
+
+.pedigree__name:hover {
+  color: var(--color-accent);
+}
+
+.pedigree__titles {
+  font-size: 0.68rem;
+  line-height: 1.2;
+  color: var(--color-text-muted);
+  /* Титулов бывает под тридцать — в ячейку столько не влезет
+     ни при каком размере, поэтому режем двумя строками. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pedigree__meta {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.pedigree__unknown {
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+/* --- Повторяющиеся предки --------------------------------------------- */
+/*
+ * Оттенок кодирует пол, насыщенность — число повторов. Та же семантика,
+ * что и в легаси (классы maletwice / femaletwise и далее), чтобы
+ * заводчики не переучивались.
+ */
+
+.pedigree__repeat {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.pedigree__cell--repeat-male-2 { background: var(--color-pedigree-male-2x); }
+.pedigree__cell--repeat-male-3 { background: var(--color-pedigree-male-3x); }
+.pedigree__cell--repeat-male-4 {
+  background: var(--color-pedigree-male-4x);
+  color: var(--color-pedigree-on-dark);
+}
+
+.pedigree__cell--repeat-female-2 { background: var(--color-pedigree-female-2x); }
+.pedigree__cell--repeat-female-3 { background: var(--color-pedigree-female-3x); }
+.pedigree__cell--repeat-female-4 {
+  background: var(--color-pedigree-female-4x);
+  color: var(--color-pedigree-on-dark);
+}
+
+/* На тёмных ступенях светлеет всё, включая ссылку и подписи. */
+.pedigree__cell--repeat-male-4 .pedigree__name,
+.pedigree__cell--repeat-female-4 .pedigree__name,
+.pedigree__cell--repeat-male-4 .pedigree__titles,
+.pedigree__cell--repeat-female-4 .pedigree__titles,
+.pedigree__cell--repeat-male-4 .pedigree__meta,
+.pedigree__cell--repeat-female-4 .pedigree__meta,
+.pedigree__cell--repeat-male-4 .pedigree__repeat,
+.pedigree__cell--repeat-female-4 .pedigree__repeat {
+  color: var(--color-pedigree-on-dark);
+}
+
+/* --- Отметка здоровья -------------------------------------------------- */
+/*
+ * Точка в углу ячейки. Того, чего нет у конкурента: проблему в предках
+ * видно сразу, не открывая каждого по очереди. Цветом одним не кодируем —
+ * у элемента есть title, а полная картина в блоке «Здоровье».
+ */
+
+.pedigree__health {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.pedigree__health--clear { background: var(--color-status-clear); }
+.pedigree__health--carrier { background: var(--color-status-carrier); }
+.pedigree__health--affected { background: var(--color-status-affected); }
+
+/* --- Легенда ----------------------------------------------------------- */
+
+.pedigree-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.25rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.pedigree-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.pedigree-legend__swatch {
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--color-border);
+}
+
+.pedigree-legend__swatch--male-2 { background: var(--color-pedigree-male-2x); }
+.pedigree-legend__swatch--male-3 { background: var(--color-pedigree-male-3x); }
+.pedigree-legend__swatch--male-4 { background: var(--color-pedigree-male-4x); }
+.pedigree-legend__swatch--female-2 { background: var(--color-pedigree-female-2x); }
+.pedigree-legend__swatch--female-3 { background: var(--color-pedigree-female-3x); }
+.pedigree-legend__swatch--female-4 { background: var(--color-pedigree-female-4x); }
+
+/* --- Состояния, которые добавляет остров ------------------------------ */
+
+/* Подсветка всех вхождений одного предка при наведении. В инбредной
+   родословной собака встречается до пяти раз в разных ветвях — глазами
+   их не свести, а это ровно то, ради чего родословную и открывают. */
+.pedigree__cell--linked {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+/* Ячейка кликабельна: по ней дерево перестраивается от этого предка. */
+.pedigree__cell:not(.pedigree__cell--empty) {
+  cursor: pointer;
+}
+
+.pedigree--loading {
+  opacity: 0.55;
+  transition: opacity 120ms ease;
+}
+
+.pedigree-block__back {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font: inherit;
+  font-size: inherit;
+  cursor: pointer;
+}
+
+.pedigree-block__back:hover {
+  text-decoration: underline;
+}

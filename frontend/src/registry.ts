@@ -11,6 +11,7 @@ import type { ComponentType } from "react";
  */
 export const islands: Record<string, () => Promise<{ default: ComponentType<any> }>> = {
   "dog-search": () => import("./islands/DogSearch"),
+  "pedigree-tree": () => import("./islands/PedigreeTree"),
 };
 
 export type IslandName = keyof typeof islands;
